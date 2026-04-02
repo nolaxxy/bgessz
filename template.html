@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Baugesuche Kanton Schwyz – Karte</title>
+<meta name="description" content="Aktuelle Baugesuche im Kanton Schwyz auf der Karte. Neubau, Umbau, Sanierung – alle Bauvorhaben mit Einsprachefrist, Bauherrschaft und Standort.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://wohnen-innerschweiz.ch">
+<meta property="og:title" content="Baugesuche Kanton Schwyz – Live-Karte">
+<meta property="og:description" content="Alle aktuellen Baugesuche im Kanton Schwyz auf einer interaktiven Karte.">
+<meta property="og:type" content="website">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:#f5f4f1;color:#1a1a1a;-webkit-font-smoothing:antialiased}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-thumb{background:#bbb;border-radius:10px}
+
+#app{display:flex;width:100%;height:100%}
+
+#sidebar{width:400px;min-width:400px;height:100%;display:flex;flex-direction:column;background:#fff;border-right:1px solid #e0ddd8;z-index:10}
+.hdr{padding:18px 18px 14px;border-bottom:1px solid #e0ddd8}
+.hdr-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.hdr h1{font-size:17px;font-weight:700;letter-spacing:-.3px}
+.hdr .sub{font-size:11px;color:#888;margin-top:1px}
+.cnt{background:#eee;border-radius:7px;padding:4px 11px;font-size:15px;font-weight:700}
+
+#search-input{width:100%;padding:9px 12px;border:1.5px solid #ddd;border-radius:7px;font-size:13px;outline:none;font-family:inherit;background:#fafaf8}
+#search-input:focus{border-color:#1a1a1a}
+.flts{display:flex;gap:7px;margin-top:9px}
+.flts select{flex:1;padding:7px 8px;border:1.5px solid #ddd;border-radius:7px;font-size:12px;font-family:inherit;cursor:pointer;background:#fafaf8}
+
+#list-wrap{flex:1;overflow-y:auto;padding:10px 12px}
+.empty{text-align:center;padding:50px 20px;color:#999;font-size:14px}
+
+.cd{background:#fff;border-radius:9px;padding:12px;cursor:pointer;border:1.5px solid transparent;margin-bottom:7px;transition:all .15s}
+.cd:hover{border-color:#ccc;box-shadow:0 1px 6px rgba(0,0,0,.05)}
+.cd.act{border-color:#1a1a1a;box-shadow:0 2px 10px rgba(0,0,0,.08)}
+.cd-t{font-size:13px;font-weight:600;line-height:1.35;margin-bottom:2px}
+.cd-g{font-size:11.5px;color:#888;margin-bottom:5px}
+.cd-tags{display:flex;gap:4px;flex-wrap:wrap;align-items:center}
+
+.bg{display:inline-block;padding:2px 7px;border-radius:4px;font-size:10.5px;font-weight:600}
+.bh-name{font-size:10.5px;color:#aaa;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:inline-block;vertical-align:middle}
+
+#detail-wrap{flex:1;overflow-y:auto;padding:14px 16px;display:none}
+.bk{display:inline-flex;align-items:center;gap:3px;background:none;border:none;cursor:pointer;font-size:13px;color:#888;font-family:inherit;margin-bottom:12px;padding:0}
+.bk:hover{color:#1a1a1a}
+.dt{font-size:16px;font-weight:700;line-height:1.35;margin-bottom:7px}
+.dtags{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:14px}
+.fbox{border-radius:8px;padding:11px;margin-bottom:14px}
+.dl{font-size:10.5px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:.5px;margin-bottom:1px}
+.dv{font-size:13px;line-height:1.45}
+.df{margin-bottom:12px}
+.lnk{display:block;text-align:center;background:#1a1a1a;color:#fff;padding:10px;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;margin-top:18px}
+.lnk:hover{background:#333}
+
+.ftr{padding:9px 18px;border-top:1px solid #e0ddd8;font-size:10.5px;color:#aaa;display:flex;justify-content:space-between}
+
+#tbtn{position:fixed;top:10px;left:390px;z-index:20;background:#fff;border:1.5px solid #ddd;border-radius:7px;width:30px;height:30px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;box-shadow:0 1px 3px rgba(0,0,0,.1);transition:left .25s}
+
+#map-wrap{flex:1;position:relative}
+#map{width:100%;height:100%}
+
+#layer-switch{position:absolute;top:12px;right:12px;z-index:1000;display:flex;background:#fff;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.15);overflow:hidden;border:1.5px solid #e0ddd8}
+#layer-switch button{padding:7px 12px;font-size:11px;font-weight:600;font-family:inherit;border:none;cursor:pointer;background:#fff;color:#888;transition:all .15s;border-right:1px solid #e8e5e0}
+#layer-switch button:last-child{border-right:none}
+#layer-switch button.active{background:#1a1a1a;color:#fff}
+#layer-switch button:hover:not(.active){background:#f5f4f1;color:#1a1a1a}
+
+#lgd{position:absolute;bottom:14px;left:14px;background:rgba(255,255,255,.93);border-radius:9px;padding:9px 12px;font-size:10.5px;box-shadow:0 1px 6px rgba(0,0,0,.1);z-index:5}
+#lgd b{display:block;margin-bottom:4px}
+.lgd-i{display:inline-flex;align-items:center;gap:3px;margin-right:10px;margin-bottom:2px}
+.lgd-d{width:8px;height:8px;border-radius:50%;display:inline-block}
+
+.leaflet-control-zoom a{background:#fff !important;color:#1a1a1a !important;border:none !important;box-shadow:0 1px 3px rgba(0,0,0,.12) !important}
+
+@media(max-width:768px){
+  #tbtn{display:none !important}
+  #sidebar{
+    position:fixed;bottom:0;left:0;right:0;top:auto;
+    width:100% !important;min-width:0 !important;
+    height:auto;max-height:75vh;
+    border-right:none;border-top:1px solid #ddd;
+    border-radius:16px 16px 0 0;
+    box-shadow:0 -4px 20px rgba(0,0,0,.12);
+    z-index:1000;
+    transition:transform .35s cubic-bezier(.4,0,.2,1);
+  }
+  #sidebar.mobile-collapsed{transform:translateY(calc(100% - 60px))}
+  #mobile-handle{display:flex !important;justify-content:center;padding:10px 0 4px;cursor:grab}
+  #mobile-handle .bar{width:36px;height:4px;border-radius:3px;background:#ccc}
+  .hdr{padding:10px 16px 10px}
+  .hdr-top{margin-bottom:8px}
+  .hdr h1{font-size:15px}
+  #search-input{font-size:16px;padding:10px 12px}
+  .flts select{font-size:13px;padding:8px}
+  #list-wrap{max-height:40vh;padding:8px 12px}
+  #detail-wrap{max-height:55vh;padding:12px 16px}
+  .cd{padding:11px}
+  .cd-t{font-size:14px}
+  #layer-switch{top:auto;bottom:14px;right:14px}
+  #layer-switch button{padding:8px 11px;font-size:10.5px}
+  #lgd{display:none}
+  .ftr{display:none}
+  .leaflet-control-zoom{display:none !important}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="sidebar">
+    <div id="mobile-handle" style="display:none"><div class="bar"></div></div>
+    <div class="hdr">
+      <div class="hdr-top">
+        <div><h1>Baugesuche Schwyz</h1><div class="sub">amtsblatt.sz.ch &middot; Stand <!--LAST_UPDATE--></div></div>
+        <div class="cnt" id="total-count">0</div>
+      </div>
+      <input type="text" id="search-input" placeholder="Suchen: Adresse, Bauherr, Architekt..."/>
+      <div class="flts">
+        <select id="sel-gem"></select>
+        <select id="sel-typ"></select>
+      </div>
+    </div>
+    <div id="list-wrap"></div>
+    <div id="detail-wrap"></div>
+    <div class="ftr"><span id="ftr-info"></span><span>wohnen-innerschweiz.ch</span></div>
+  </div>
+  <button id="tbtn">&#9664;</button>
+  <div id="map-wrap">
+    <div id="map"></div>
+    <div id="layer-switch">
+      <button class="active" data-layer="color">Karte</button>
+      <button data-layer="grey">Grau</button>
+      <button data-layer="sat">Satellit</button>
+    </div>
+    <div id="lgd"></div>
+  </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+(function(){
+var DATA = [];
+
+var COLORS={"Neubau":"#2563eb","Abbruch/Neubau":"#7c3aed","Umbau":"#d97706","Abbruch":"#dc2626","Anbau/Erweiterung":"#059669","Sanierung":"#0891b2","Energetisch":"#eab308","Baugesuch":"#6b7280"};
+var map,markers=[],filtered=[],selId=null,sideOpen=true,layers={},activeLayer='color',isMobile=window.innerWidth<=768,mobileCollapsed=false;
+
+function initMobile(){
+  if(!isMobile) return;
+  var sb=document.getElementById('sidebar'),hd=document.getElementById('mobile-handle');
+  sb.classList.add('mobile-collapsed');mobileCollapsed=true;
+  var startY=0,dragging=false;
+  function onS(e){dragging=true;startY=e.touches?e.touches[0].clientY:e.clientY;sb.style.transition='none'}
+  function onM(e){if(!dragging)return;var y=e.touches?e.touches[0].clientY:e.clientY,d=y-startY;if(mobileCollapsed){var mx=sb.offsetHeight-60;sb.style.transform='translateY(calc(100% - 60px + '+Math.max(-mx,Math.min(0,d))+'px))'}else{sb.style.transform='translateY('+Math.max(0,d)+'px)'}}
+  function onE(e){if(!dragging)return;dragging=false;sb.style.transition='transform .35s cubic-bezier(.4,0,.2,1)';var y=e.changedTouches?e.changedTouches[0].clientY:e.clientY,d=y-startY;if(mobileCollapsed&&d<-50){sb.classList.remove('mobile-collapsed');sb.style.transform='translateY(0)';mobileCollapsed=false}else if(!mobileCollapsed&&d>50){sb.classList.add('mobile-collapsed');sb.style.transform='';mobileCollapsed=true}else{sb.style.transform=mobileCollapsed?'':'translateY(0)'}}
+  hd.addEventListener('touchstart',onS,{passive:true});hd.addEventListener('touchmove',onM,{passive:false});hd.addEventListener('touchend',onE);
+  hd.addEventListener('click',function(){sb.style.transition='transform .35s cubic-bezier(.4,0,.2,1)';if(mobileCollapsed){sb.classList.remove('mobile-collapsed');sb.style.transform='translateY(0)';mobileCollapsed=false}else{sb.classList.add('mobile-collapsed');sb.style.transform='';mobileCollapsed=true}});
+}
+function expandMobile(){if(!isMobile)return;var sb=document.getElementById('sidebar');sb.style.transition='transform .35s cubic-bezier(.4,0,.2,1)';sb.classList.remove('mobile-collapsed');sb.style.transform='translateY(0)';mobileCollapsed=false}
+
+function initMap(){
+  map=L.map('map',{center:[47.05,8.68],zoom:isMobile?9:10,zoomControl:false});
+  if(!isMobile)L.control.zoom({position:'bottomright'}).addTo(map);
+  layers.color=L.tileLayer('https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-farbe/default/current/3857/{z}/{x}/{y}.jpeg',{attribution:'&copy; <a href="https://www.swisstopo.ch">swisstopo</a>',maxZoom:19});
+  layers.grey=L.tileLayer('https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-grau/default/current/3857/{z}/{x}/{y}.jpeg',{attribution:'&copy; <a href="https://www.swisstopo.ch">swisstopo</a>',maxZoom:19});
+  layers.sat=L.tileLayer('https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.swissimage/default/current/3857/{z}/{x}/{y}.jpeg',{attribution:'&copy; <a href="https://www.swisstopo.ch">swisstopo</a>',maxZoom:20});
+  layers.color.addTo(map);
+  document.querySelectorAll('#layer-switch button').forEach(function(btn){btn.addEventListener('click',function(){var k=this.getAttribute('data-layer');if(k===activeLayer)return;map.removeLayer(layers[activeLayer]);layers[k].addTo(map);activeLayer=k;document.querySelectorAll('#layer-switch button').forEach(function(b){b.classList.remove('active')});this.classList.add('active')})});
+}
+
+function initLegend(){var h='<b>Legende</b><div style="margin-top:4px">';for(var t in COLORS)h+='<span class="lgd-i"><span class="lgd-d" style="background:'+COLORS[t]+'"></span>'+t+'</span>';document.getElementById('lgd').innerHTML=h+'</div>'}
+
+function initFilters(){
+  var gs={},ts={};DATA.forEach(function(b){if(b.gemeinde)gs[b.gemeinde]=1;ts[b.typ]=1});
+  var ge=document.getElementById('sel-gem');ge.innerHTML='<option value="">Alle Gemeinden</option>';Object.keys(gs).sort().forEach(function(g){ge.innerHTML+='<option value="'+g+'">'+g+'</option>'});
+  var te=document.getElementById('sel-typ');te.innerHTML='<option value="">Alle Typen</option>';Object.keys(ts).sort().forEach(function(t){te.innerHTML+='<option value="'+t+'">'+t+'</option>'});
+}
+
+function fmtDate(s){if(!s)return'\u2013';var p=s.split('-');return p[2]+'.'+p[1]+'.'+p[0]}
+function daysLeft(s){if(!s)return null;return Math.ceil((new Date(s+'T23:59:59')-new Date())/86400000)}
+function col(t){return COLORS[t]||'#6b7280'}
+function esc(s){if(!s)return'';var d=document.createElement('div');d.textContent=s;return d.innerHTML}
+
+function renderMarkers(){
+  markers.forEach(function(m){map.removeLayer(m)});markers=[];var c=0;
+  filtered.forEach(function(bg){if(!bg.lat||!bg.lon)return;c++;var cl=col(bg.typ),sz=isMobile?16:14;
+    var ic=L.divIcon({className:'',iconSize:[sz,sz],iconAnchor:[sz/2,sz/2],html:'<div style="width:'+sz+'px;height:'+sz+'px;background:'+cl+';border:2.5px solid #fff;border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,.35);cursor:pointer"></div>'});
+    var mk=L.marker([bg.lat,bg.lon],{icon:ic}).addTo(map);mk.on('click',function(){selectBg(bg.id);if(isMobile)expandMobile()});markers.push(mk)});
+  var fi=document.getElementById('ftr-info');if(fi)fi.textContent=c+' von '+filtered.length+' auf Karte';
+}
+
+function renderList(){
+  var el=document.getElementById('list-wrap');document.getElementById('total-count').textContent=filtered.length;
+  if(!filtered.length){el.innerHTML='<div class="empty">Keine Baugesuche gefunden</div>';return}
+  var h='';filtered.forEach(function(bg){var c=col(bg.typ),d=daysLeft(bg.deadlineTo),ub='';
+    if(d!==null&&d>=0&&d<=10)ub='<span class="bg" style="background:#fef3c7;color:#92400e">Noch '+d+'d</span>';
+    var bn=bg.bauherr?'<span class="bh-name">'+esc(bg.bauherr)+'</span>':'';
+    h+='<div class="cd'+(selId===bg.id?' act':'')+'" data-id="'+bg.id+'"><div class="cd-t">'+esc((bg.title||'').replace('Baugesuch - ',''))+'</div><div class="cd-g">'+(bg.gemeinde||'')+'</div><div class="cd-tags"><span class="bg" style="background:'+c+'18;color:'+c+'">'+bg.typ+'</span>'+ub+bn+'</div></div>'});
+  el.innerHTML=h;el.querySelectorAll('.cd').forEach(function(c){c.addEventListener('click',function(){selectBg(this.getAttribute('data-id'))})});
+}
+
+function selectBg(id){selId=id;var bg=DATA.find(function(b){return b.id===id});if(!bg)return;
+  document.getElementById('list-wrap').style.display='none';document.getElementById('detail-wrap').style.display='block';
+  renderDetail(bg);if(bg.lat&&bg.lon)map.flyTo([bg.lat,bg.lon],isMobile?15:16,{duration:.7})}
+
+function deselectBg(){selId=null;document.getElementById('detail-wrap').style.display='none';document.getElementById('list-wrap').style.display='block';renderList()}
+
+function renderDetail(bg){
+  var el=document.getElementById('detail-wrap'),c=col(bg.typ),d=daysLeft(bg.deadlineTo),isE=d!==null&&d<0,isU=d!==null&&d<=7&&d>=0;
+  var h='<button class="bk" onclick="window._desel()">\u2190 Zur\u00fcck</button>';
+  h+='<div class="dt">'+esc(bg.title)+'</div><div class="dtags"><span class="bg" style="background:'+c+'18;color:'+c+'">'+bg.typ+'</span><span class="bg" style="background:#eee;color:#555">'+esc(bg.gemeinde)+'</span></div>';
+  if(bg.deadlineTo){var fb=isE?'#fef2f2':isU?'#fffbeb':'#f0fdf4',bb=isE?'#fee2e2':isU?'#fef3c7':'#dcfce7',bc=isE?'#dc2626':isU?'#d97706':'#16a34a',bt=isE?'Abgelaufen':d+' Tage';
+    h+='<div class="fbox" style="background:'+fb+'"><div class="dl">Einsprachefrist</div><div style="display:flex;align-items:center;justify-content:space-between"><span class="dv">'+fmtDate(bg.deadlineFrom)+' \u2013 '+fmtDate(bg.deadlineTo)+'</span><span class="bg" style="background:'+bb+';color:'+bc+'">'+bt+'</span></div></div>'}
+  if(bg.bauherr){h+='<div class="df"><div class="dl">Bauherrschaft</div><div class="dv">'+esc(bg.bauherr);if(bg.bauherrAdresse)h+='<br><span style="color:#888">'+esc(bg.bauherrAdresse)+'</span>';h+='</div></div>'}
+  if(bg.projektverfasser)h+='<div class="df"><div class="dl">Projektverfasser/in</div><div class="dv">'+esc(bg.projektverfasser)+'</div></div>';
+  if(bg.beschreibung)h+='<div class="df"><div class="dl">Beschreibung</div><div class="dv" style="font-size:12px;line-height:1.5">'+esc(bg.beschreibung)+'</div></div>';
+  h+='<div class="df"><div class="dl">Meldungsnummer</div><div class="dv">'+esc(bg.pubNumber)+'</div></div>';
+  h+='<div class="df"><div class="dl">Publikationsdatum</div><div class="dv">'+fmtDate(bg.pubDate)+'</div></div>';
+  if(bg.contact)h+='<div class="df"><div class="dl">Kontakt</div><div class="dv" style="white-space:pre-line;font-size:12px">'+esc(bg.contact)+'</div></div>';
+  h+='<a class="lnk" href="https://amtsblatt.sz.ch/#!/search/publications/detail/'+bg.id+'" target="_blank" rel="noopener">Im Amtsblatt \u00f6ffnen \u2192</a><div style="height:30px"></div>';
+  el.innerHTML=h;
+}
+window._desel=deselectBg;
+
+function applyFilters(){
+  var q=document.getElementById('search-input').value.toLowerCase(),gm=document.getElementById('sel-gem').value,tp=document.getElementById('sel-typ').value;
+  filtered=DATA.filter(function(b){if(gm&&b.gemeinde!==gm)return false;if(tp&&b.typ!==tp)return false;
+    if(q)return(b.title||'').toLowerCase().indexOf(q)>=0||(b.bauherr||'').toLowerCase().indexOf(q)>=0||(b.projektverfasser||'').toLowerCase().indexOf(q)>=0||(b.beschreibung||'').toLowerCase().indexOf(q)>=0||(b.gemeinde||'').toLowerCase().indexOf(q)>=0;return true});
+  if(selId&&!filtered.find(function(b){return b.id===selId}))deselectBg();else renderList();renderMarkers();
+}
+
+document.getElementById('search-input').addEventListener('input',applyFilters);
+document.getElementById('sel-gem').addEventListener('change',applyFilters);
+document.getElementById('sel-typ').addEventListener('change',applyFilters);
+document.getElementById('tbtn').addEventListener('click',function(){sideOpen=!sideOpen;var sb=document.getElementById('sidebar');if(sideOpen){sb.style.display='flex';this.style.left='390px';this.innerHTML='&#9664;'}else{sb.style.display='none';this.style.left='10px';this.innerHTML='&#9654;'}setTimeout(function(){map.invalidateSize()},50)});
+window.addEventListener('resize',function(){var w=window.innerWidth<=768;if(w!==isMobile){isMobile=w;var sb=document.getElementById('sidebar');if(isMobile){sb.style.display='flex';sb.classList.add('mobile-collapsed');mobileCollapsed=true}else{sb.classList.remove('mobile-collapsed');sb.style.transform='';sb.style.display='flex'}map.invalidateSize()}});
+
+initMap();initLegend();initFilters();initMobile();applyFilters();
+})();
+</script>
+</body>
+</html>
