@@ -1,0 +1,33 @@
+name: Update Baugesuche
+
+on:
+  schedule:
+    - cron: '0 6 * * *'
+    - cron: '0 16 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Fetch Baugesuche
+        run: python fetch_baugesuche.py
+      - name: Commit if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/baugesuche.json
+          if git diff --staged --quiet; then
+            echo "No changes"
+          else
+            git commit -m "data: update $(date -u +%Y-%m-%d)"
+            git push
+          fi
