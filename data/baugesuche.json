@@ -1,6 +1,6 @@
 {
   "meta": {
-    "fetchedAt": "2026-04-12T16:30:04.739522+00:00",
+    "fetchedAt": "2026-04-13T08:11:38.448284+00:00",
     "source": "amtsblatt.sz.ch",
     "tenant": "kabsz",
     "rubric": "BA-SZ05",
@@ -2508,6 +2508,27 @@
       "contact": "Planen Bauen Umwelt und Energie\n055 418 41 71\nbauen@bezirkeinsiedeln.ch"
     },
     {
+      "id": "5955fcb5-6c18-4e17-835f-e97ba11baa0e",
+      "title": "Baugesuch - Maienberg 9, Altendorf",
+      "pubNumber": "BA-SZ05-0000000398",
+      "pubDate": "2026-03-18",
+      "expDate": "2026-04-18",
+      "gemeinde": "Altendorf",
+      "municipalityId": "1341",
+      "registrationOffice": "Politische Gemeinde Altendorf - Bauamt",
+      "bauherr": "Barbara Knutti-Züger",
+      "bauherrAdresse": "Maienberg 9, 8852 Altendorf",
+      "projektverfasser": "MZ Sanitär und Heizung AG, St.Gallerstrasse 86",
+      "bauobjekt": "Luft/Wasser-Wärmepumpenanlage (Aussenaufstelltung), Maienberg 9, Altendorf",
+      "beschreibung": "Innerhalb Bauzone; Projektverfasserin: MZ Sanitär und Heizung AG, St.Gallerstrasse 86, 8853 Lachen. Bauobjekt: Luft/Wasser-Wärmepumpenanlage (Aussenaufstelltung), Maienberg 9, Altendorf, KTN 735, Koordinaten 2 704 783/1 227 559.",
+      "typ": "Energetisch",
+      "lat": 47.190672,
+      "lon": 8.821311,
+      "deadlineFrom": "2026-03-18",
+      "deadlineTo": "2026-04-07",
+      "contact": "Bauamt\nTel. 055 451 77 33\nbauamt@altendorf.ch"
+    },
+    {
       "id": "18ffda2c-39cc-4bd3-965b-ea47b7543a82",
       "title": "Baugesuch - Bahnhofstrasse 172/174, Schwyz",
       "pubNumber": "BA-SZ05-0000000393",
@@ -2548,27 +2569,6 @@
       "deadlineFrom": "2026-03-18",
       "deadlineTo": "2026-04-07",
       "contact": "Bauamt\n055 450 24 61\nbauamt@galgenen.ch"
-    },
-    {
-      "id": "5955fcb5-6c18-4e17-835f-e97ba11baa0e",
-      "title": "Baugesuch - Maienberg 9, Altendorf",
-      "pubNumber": "BA-SZ05-0000000398",
-      "pubDate": "2026-03-18",
-      "expDate": "2026-04-18",
-      "gemeinde": "Altendorf",
-      "municipalityId": "1341",
-      "registrationOffice": "Politische Gemeinde Altendorf - Bauamt",
-      "bauherr": "Barbara Knutti-Züger",
-      "bauherrAdresse": "Maienberg 9, 8852 Altendorf",
-      "projektverfasser": "MZ Sanitär und Heizung AG, St.Gallerstrasse 86",
-      "bauobjekt": "Luft/Wasser-Wärmepumpenanlage (Aussenaufstelltung), Maienberg 9, Altendorf",
-      "beschreibung": "Innerhalb Bauzone; Projektverfasserin: MZ Sanitär und Heizung AG, St.Gallerstrasse 86, 8853 Lachen. Bauobjekt: Luft/Wasser-Wärmepumpenanlage (Aussenaufstelltung), Maienberg 9, Altendorf, KTN 735, Koordinaten 2 704 783/1 227 559.",
-      "typ": "Energetisch",
-      "lat": 47.190672,
-      "lon": 8.821311,
-      "deadlineFrom": "2026-03-18",
-      "deadlineTo": "2026-04-07",
-      "contact": "Bauamt\nTel. 055 451 77 33\nbauamt@altendorf.ch"
     },
     {
       "id": "64849c25-d550-4d2e-9499-148ea477ed32",
