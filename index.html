@@ -4,21 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Baugesuche Kanton Schwyz – Karte</title>
-<meta name="description" content="Aktuelle Baugesuche im Kanton Schwyz auf der Karte. Neubau, Umbau, Sanierung – alle Bauvorhaben mit Einsprachefrist und Standort.">
-<meta property="og:title" content="Baugesuche Kanton Schwyz – Live-Karte">
-<meta property="og:description" content="Alle aktuellen Baugesuche im Kanton Schwyz auf einer interaktiven Karte.">
-<meta property="og:type" content="website">
+<meta name="description" content="Aktuelle Baugesuche im Kanton Schwyz auf der Karte.">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;overflow:hidden}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:#f5f4f1;color:#1a1a1a;-webkit-font-smoothing:antialiased}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:#1a1a1a;color:#1a1a1a;-webkit-font-smoothing:antialiased}
 ::-webkit-scrollbar{width:5px}
 ::-webkit-scrollbar-thumb{background:#bbb;border-radius:10px}
 #app{display:flex;width:100%;height:100%}
-
-/* Sidebar - fixed, always visible on desktop */
 #sidebar{width:400px;min-width:400px;height:100%;display:flex;flex-direction:column;background:#fff;border-right:1px solid #e0ddd8;z-index:10}
 .hdr{padding:18px 18px 14px;border-bottom:1px solid #e0ddd8}
 .hdr-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
@@ -29,6 +24,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,san
 #search-input:focus{border-color:#1a1a1a}
 .flts{display:flex;gap:7px;margin-top:9px}
 .flts select{flex:1;padding:7px 8px;border:1.5px solid #ddd;border-radius:7px;font-size:12px;font-family:inherit;cursor:pointer;background:#fafaf8}
+.sort-row{display:flex;gap:7px;margin-top:7px;align-items:center}
+.sort-row select{flex:1;padding:6px 8px;border:1.5px solid #ddd;border-radius:7px;font-size:11px;font-family:inherit;cursor:pointer;background:#fafaf8}
+.sort-row label{font-size:11px;color:#888;font-weight:600;white-space:nowrap}
 #list-wrap{flex:1;overflow-y:auto;padding:10px 12px}
 .empty{text-align:center;padding:50px 20px;color:#999;font-size:14px}
 .loading{text-align:center;padding:60px 20px;color:#888}
@@ -36,9 +34,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,san
 @keyframes spin{to{transform:rotate(360deg)}}
 .error{text-align:center;padding:40px 20px;color:#c00}
 .error button{margin-top:10px;padding:8px 16px;border:1.5px solid #ddd;border-radius:7px;background:#fff;cursor:pointer;font-family:inherit;font-size:13px}
+.date-sep{font-size:10.5px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:.5px;padding:8px 4px 4px;margin-top:4px}
+.date-sep.today{color:#16a34a}
 .cd{background:#fff;border-radius:9px;padding:12px;cursor:pointer;border:1.5px solid transparent;margin-bottom:7px;transition:all .15s}
 .cd:hover{border-color:#ccc;box-shadow:0 1px 6px rgba(0,0,0,.05)}
 .cd.act{border-color:#1a1a1a;box-shadow:0 2px 10px rgba(0,0,0,.08)}
+.cd.is-new{border-left:3px solid #16a34a}
 .cd-t{font-size:13px;font-weight:600;line-height:1.35;margin-bottom:2px}
 .cd-g{font-size:11.5px;color:#888;margin-bottom:5px}
 .cd-tags{display:flex;gap:4px;flex-wrap:wrap;align-items:center}
@@ -55,39 +56,23 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,san
 .df{margin-bottom:12px}
 .lnk{display:block;text-align:center;background:#1a1a1a;color:#fff;padding:10px;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;margin-top:18px}
 .lnk:hover{background:#333}
-.ftr{padding:9px 18px;border-top:1px solid #e0ddd8;font-size:10.5px;color:#aaa;display:flex;justify-content:space-between}
-
-/* Map */
-#map-wrap{flex:1;position:relative}
+.ftr{padding:8px 18px;border-top:1px solid #e0ddd8;font-size:9.5px;color:#aaa;line-height:1.4}
+.ftr-top{display:flex;justify-content:space-between;margin-bottom:2px}
+#map-wrap{flex:1;position:relative;background:#1a1a1a}
 #map{width:100%;height:100%}
-
-/* Layer switch */
 #layer-switch{position:absolute;top:12px;right:12px;z-index:1000;display:flex;background:#fff;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.15);overflow:hidden;border:1.5px solid #e0ddd8}
 #layer-switch button{padding:7px 12px;font-size:11px;font-weight:600;font-family:inherit;border:none;cursor:pointer;background:#fff;color:#888;transition:all .15s;border-right:1px solid #e8e5e0}
 #layer-switch button:last-child{border-right:none}
 #layer-switch button.active{background:#1a1a1a;color:#fff}
 #layer-switch button:hover:not(.active){background:#f5f4f1;color:#1a1a1a}
-
-/* Legend - ABOVE map tiles */
-#lgd{position:absolute;bottom:14px;left:14px;background:rgba(255,255,255,.96);border-radius:9px;padding:10px 14px;font-size:10.5px;box-shadow:0 2px 8px rgba(0,0,0,.12);z-index:1000;pointer-events:auto}
+#lgd{position:absolute;bottom:14px;left:14px;background:rgba(255,255,255,.96);border-radius:9px;padding:10px 14px;font-size:10.5px;box-shadow:0 2px 8px rgba(0,0,0,.12);z-index:1000}
 #lgd b{display:block;margin-bottom:5px;font-size:11px}
 .lgd-i{display:inline-flex;align-items:center;gap:3px;margin-right:10px;margin-bottom:3px}
 .lgd-d{width:8px;height:8px;border-radius:50%;display:inline-block}
-
 .leaflet-control-zoom a{background:#fff !important;color:#1a1a1a !important;border:none !important;box-shadow:0 1px 3px rgba(0,0,0,.12) !important}
-
-/* Mobile */
+.leaflet-container{background:#1a1a1a !important}
 @media(max-width:768px){
-  #sidebar{
-    position:fixed;bottom:0;left:0;right:0;top:auto;
-    width:100% !important;min-width:0 !important;
-    height:auto;max-height:75vh;
-    border-right:none;border-top:1px solid #ddd;
-    border-radius:16px 16px 0 0;
-    box-shadow:0 -4px 20px rgba(0,0,0,.12);
-    z-index:1000;
-    transition:transform .35s cubic-bezier(.4,0,.2,1);
-  }
+  #sidebar{position:fixed;bottom:0;left:0;right:0;top:auto;width:100% !important;min-width:0 !important;height:auto;max-height:75vh;border-right:none;border-top:1px solid #ddd;border-radius:16px 16px 0 0;box-shadow:0 -4px 20px rgba(0,0,0,.12);z-index:1000;transition:transform .35s cubic-bezier(.4,0,.2,1)}
   #sidebar.m-col{transform:translateY(calc(100% - 60px))}
   #mobile-handle{display:flex !important;justify-content:center;padding:10px 0 4px;cursor:grab}
   #mobile-handle .bar{width:36px;height:4px;border-radius:3px;background:#ccc}
@@ -96,8 +81,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,san
   #list-wrap{max-height:40vh;padding:8px 12px}#detail-wrap{max-height:55vh;padding:12px 16px}
   .cd{padding:11px}.cd-t{font-size:14px}
   #layer-switch{top:auto;bottom:14px;right:14px}#layer-switch button{padding:8px 11px;font-size:10.5px}
-  #lgd,.ftr{display:none}
-  .leaflet-control-zoom{display:none !important}
+  #lgd,.ftr{display:none}.leaflet-control-zoom{display:none !important}
 }
 </style>
 </head>
@@ -115,10 +99,22 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,san
         <select id="sel-gem" disabled></select>
         <select id="sel-typ" disabled></select>
       </div>
+      <div class="sort-row">
+        <label>Sortierung:</label>
+        <select id="sel-sort" disabled>
+          <option value="date-desc">Neueste zuerst</option>
+          <option value="date-asc">Älteste zuerst</option>
+          <option value="frist">Frist ablaufend</option>
+          <option value="gemeinde">Gemeinde A–Z</option>
+        </select>
+      </div>
     </div>
     <div id="list-wrap"><div class="loading"><div class="spinner"></div>Baugesuche werden geladen...</div></div>
     <div id="detail-wrap"></div>
-    <div class="ftr"><span id="ftr-info"></span></div>
+    <div class="ftr">
+      <div class="ftr-top"><span id="ftr-info"></span></div>
+      <div>Datenquelle: Amtsblatt Kanton Schwyz (amtsblatt.sz.ch). Alle Angaben ohne Gewähr. Keine Rechtsberatung. Massgebend ist die amtliche Publikation.</div>
+    </div>
   </div>
   <div id="map-wrap">
     <div id="map"></div>
@@ -134,134 +130,88 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,san
 <script>
 (function(){
 "use strict";
-
-var DATA_URL = "data/baugesuche.json";
+var DATA_URL="data/baugesuche.json";
 var COLORS={"Neubau":"#2563eb","Abbruch/Neubau":"#7c3aed","Umbau":"#d97706","Abbruch":"#dc2626","Anbau/Erweiterung":"#059669","Sanierung":"#0891b2","Energetisch":"#eab308","Baugesuch":"#6b7280"};
 var DATA=[],map,markers=[],filtered=[],selId=null,layers={},activeLayer="color",isMobile=window.innerWidth<=768,mCol=false;
+var swissBounds=L.latLngBounds(L.latLng(45.75,5.9),L.latLng(47.85,10.55));
 
-/* ─── Load data ─── */
+function todayStr(){var d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+function fmtDateLabel(s){if(!s)return"";var p=s.split("-");var m=["Jan","Feb","M\u00e4r","Apr","Mai","Jun","Jul","Aug","Sep","Okt","Nov","Dez"];return parseInt(p[2])+". "+m[parseInt(p[1])-1]+" "+p[0]}
+
 function loadData(){
-  fetch(DATA_URL).then(function(r){
-    if(!r.ok) throw new Error("HTTP "+r.status);
-    return r.json();
-  }).then(function(json){
-    if(json.data && Array.isArray(json.data)){
-      DATA=json.data;
-      var ts=json.meta&&json.meta.fetchedAt;
-      if(ts){var d=new Date(ts);document.getElementById("sub-info").textContent="amtsblatt.sz.ch \u00b7 Stand "+d.toLocaleDateString("de-CH")+", "+d.toLocaleTimeString("de-CH",{hour:"2-digit",minute:"2-digit"})}
-      else{document.getElementById("sub-info").textContent="amtsblatt.sz.ch"}
-    } else if(Array.isArray(json)){DATA=json;document.getElementById("sub-info").textContent="amtsblatt.sz.ch"}
+  fetch(DATA_URL).then(function(r){if(!r.ok)throw new Error("HTTP "+r.status);return r.json()}).then(function(json){
+    if(json.data&&Array.isArray(json.data)){DATA=json.data;var ts=json.meta&&json.meta.fetchedAt;if(ts){var d=new Date(ts);document.getElementById("sub-info").textContent="amtsblatt.sz.ch \u00b7 Stand "+d.toLocaleDateString("de-CH")}else{document.getElementById("sub-info").textContent="amtsblatt.sz.ch"}}
+    else if(Array.isArray(json)){DATA=json;document.getElementById("sub-info").textContent="amtsblatt.sz.ch"}
     else{throw new Error("Unexpected format")}
     onDataLoaded();
-  }).catch(function(err){
-    console.error("Data load error:",err);
-    document.getElementById("list-wrap").innerHTML='<div class="error"><p>Daten konnten nicht geladen werden.</p><p style="font-size:12px;color:#888;margin-top:4px">'+esc(err.message)+'</p><button onclick="location.reload()">Erneut versuchen</button></div>';
-  });
+  }).catch(function(err){document.getElementById("list-wrap").innerHTML='<div class="error"><p>Daten konnten nicht geladen werden.</p><p style="font-size:12px;color:#888;margin-top:4px">'+esc(err.message)+'</p><button onclick="location.reload()">Erneut versuchen</button></div>'});
 }
+function onDataLoaded(){document.getElementById("search-input").disabled=false;document.getElementById("sel-gem").disabled=false;document.getElementById("sel-typ").disabled=false;document.getElementById("sel-sort").disabled=false;initFilters();applyFilters()}
 
-function onDataLoaded(){
-  document.getElementById("search-input").disabled=false;
-  document.getElementById("sel-gem").disabled=false;
-  document.getElementById("sel-typ").disabled=false;
-  initFilters();applyFilters();
-}
-
-/* ─── Map ─── */
 function initMap(){
-  map=L.map("map",{center:[47.05,8.68],zoom:isMobile?9:10,zoomControl:false});
-  if(!isMobile) L.control.zoom({position:"bottomright"}).addTo(map);
-  layers.color=L.tileLayer("https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-farbe/default/current/3857/{z}/{x}/{y}.jpeg",{attribution:'\u00a9 <a href="https://www.swisstopo.ch">swisstopo</a>',maxZoom:19});
-  layers.grey=L.tileLayer("https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-grau/default/current/3857/{z}/{x}/{y}.jpeg",{attribution:'\u00a9 <a href="https://www.swisstopo.ch">swisstopo</a>',maxZoom:19});
-  layers.sat=L.tileLayer("https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.swissimage/default/current/3857/{z}/{x}/{y}.jpeg",{attribution:'\u00a9 <a href="https://www.swisstopo.ch">swisstopo</a>',maxZoom:20});
+  map=L.map("map",{center:[47.05,8.68],zoom:isMobile?10:10,zoomControl:false,maxBounds:swissBounds,maxBoundsViscosity:1.0,minZoom:isMobile?9:10});
+  if(!isMobile)L.control.zoom({position:"bottomright"}).addTo(map);
+  layers.color=L.tileLayer("https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-farbe/default/current/3857/{z}/{x}/{y}.jpeg",{attribution:'\u00a9 swisstopo',maxZoom:19,bounds:swissBounds});
+  layers.grey=L.tileLayer("https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-grau/default/current/3857/{z}/{x}/{y}.jpeg",{attribution:'\u00a9 swisstopo',maxZoom:19,bounds:swissBounds});
+  layers.sat=L.tileLayer("https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.swissimage/default/current/3857/{z}/{x}/{y}.jpeg",{attribution:'\u00a9 swisstopo',maxZoom:20,bounds:swissBounds});
   layers.color.addTo(map);
-  document.querySelectorAll("#layer-switch button").forEach(function(btn){
-    btn.addEventListener("click",function(){var k=this.getAttribute("data-layer");if(k===activeLayer)return;map.removeLayer(layers[activeLayer]);layers[k].addTo(map);activeLayer=k;document.querySelectorAll("#layer-switch button").forEach(function(b){b.classList.remove("active")});this.classList.add("active")});
-  });
+  document.querySelectorAll("#layer-switch button").forEach(function(btn){btn.addEventListener("click",function(){var k=this.getAttribute("data-layer");if(k===activeLayer)return;map.removeLayer(layers[activeLayer]);layers[k].addTo(map);activeLayer=k;document.querySelectorAll("#layer-switch button").forEach(function(b){b.classList.remove("active")});this.classList.add("active")})});
 }
-
 function initLegend(){var h='<b>Legende</b><div style="margin-top:4px">';for(var t in COLORS)h+='<span class="lgd-i"><span class="lgd-d" style="background:'+COLORS[t]+'"></span>'+t+'</span>';document.getElementById("lgd").innerHTML=h+"</div>"}
+function initFilters(){var gs={},ts={};DATA.forEach(function(b){if(b.gemeinde)gs[b.gemeinde]=1;ts[b.typ]=1});var ge=document.getElementById("sel-gem");ge.innerHTML='<option value="">Alle Gemeinden</option>';Object.keys(gs).sort().forEach(function(g){ge.innerHTML+='<option value="'+g+'">'+g+'</option>'});var te=document.getElementById("sel-typ");te.innerHTML='<option value="">Alle Typen</option>';Object.keys(ts).sort().forEach(function(t){te.innerHTML+='<option value="'+t+'">'+t+'</option>'})}
 
-function initFilters(){
-  var gs={},ts={};DATA.forEach(function(b){if(b.gemeinde)gs[b.gemeinde]=1;ts[b.typ]=1});
-  var ge=document.getElementById("sel-gem");ge.innerHTML='<option value="">Alle Gemeinden</option>';Object.keys(gs).sort().forEach(function(g){ge.innerHTML+='<option value="'+g+'">'+g+'</option>'});
-  var te=document.getElementById("sel-typ");te.innerHTML='<option value="">Alle Typen</option>';Object.keys(ts).sort().forEach(function(t){te.innerHTML+='<option value="'+t+'">'+t+'</option>'});
-}
-
-/* ─── Mobile ─── */
-function initMobile(){
-  if(!isMobile)return;
-  var sb=document.getElementById("sidebar");sb.classList.add("m-col");mCol=true;
-  var hd=document.getElementById("mobile-handle"),startY=0,drag=false;
+function initMobile(){if(!isMobile)return;var sb=document.getElementById("sidebar");sb.classList.add("m-col");mCol=true;var hd=document.getElementById("mobile-handle"),startY=0,drag=false;
   function onS(e){drag=true;startY=e.touches?e.touches[0].clientY:e.clientY;sb.style.transition="none"}
   function onM(e){if(!drag)return;var y=e.touches?e.touches[0].clientY:e.clientY,d=y-startY;if(mCol){var mx=sb.offsetHeight-60;sb.style.transform="translateY(calc(100% - 60px + "+Math.max(-mx,Math.min(0,d))+"px))"}else{sb.style.transform="translateY("+Math.max(0,d)+"px)"}}
   function onE(e){if(!drag)return;drag=false;sb.style.transition="transform .35s cubic-bezier(.4,0,.2,1)";var y=e.changedTouches?e.changedTouches[0].clientY:e.clientY,d=y-startY;if(mCol&&d<-50){sb.classList.remove("m-col");sb.style.transform="translateY(0)";mCol=false}else if(!mCol&&d>50){sb.classList.add("m-col");sb.style.transform="";mCol=true}else{sb.style.transform=mCol?"":"translateY(0)"}}
   hd.addEventListener("touchstart",onS,{passive:true});hd.addEventListener("touchmove",onM,{passive:false});hd.addEventListener("touchend",onE);
-  hd.addEventListener("click",function(){sb.style.transition="transform .35s cubic-bezier(.4,0,.2,1)";if(mCol){sb.classList.remove("m-col");sb.style.transform="translateY(0)";mCol=false}else{sb.classList.add("m-col");sb.style.transform="";mCol=true}});
-}
+  hd.addEventListener("click",function(){sb.style.transition="transform .35s cubic-bezier(.4,0,.2,1)";if(mCol){sb.classList.remove("m-col");sb.style.transform="translateY(0)";mCol=false}else{sb.classList.add("m-col");sb.style.transform="";mCol=true}})}
 function expandMobile(){if(!isMobile)return;var sb=document.getElementById("sidebar");sb.style.transition="transform .35s cubic-bezier(.4,0,.2,1)";sb.classList.remove("m-col");sb.style.transform="translateY(0)";mCol=false}
 
-/* ─── Helpers ─── */
 function fmtDate(s){if(!s)return"\u2013";var p=s.split("-");return p[2]+"."+p[1]+"."+p[0]}
 function daysLeft(s){if(!s)return null;return Math.ceil((new Date(s+"T23:59:59")-new Date())/864e5)}
 function col(t){return COLORS[t]||"#6b7280"}
 function esc(s){if(!s)return"";var d=document.createElement("div");d.textContent=s;return d.innerHTML}
 
-/* ─── Render ─── */
-function renderMarkers(){
-  markers.forEach(function(m){map.removeLayer(m)});markers=[];var c=0;
-  filtered.forEach(function(bg){if(!bg.lat||!bg.lon)return;c++;var cl=col(bg.typ),sz=isMobile?16:14;
-    var ic=L.divIcon({className:"",iconSize:[sz,sz],iconAnchor:[sz/2,sz/2],html:'<div style="width:'+sz+'px;height:'+sz+'px;background:'+cl+';border:2.5px solid #fff;border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,.35);cursor:pointer"></div>'});
-    var mk=L.marker([bg.lat,bg.lon],{icon:ic}).addTo(map);mk.on("click",function(){selectBg(bg.id);if(isMobile)expandMobile()});markers.push(mk)});
-  var fi=document.getElementById("ftr-info");if(fi)fi.textContent=c+" von "+filtered.length+" auf Karte";
-}
+function sortFiltered(){var mode=document.getElementById("sel-sort").value;filtered.sort(function(a,b){if(mode==="date-desc")return(b.pubDate||"").localeCompare(a.pubDate||"");if(mode==="date-asc")return(a.pubDate||"").localeCompare(b.pubDate||"");if(mode==="frist")return(a.deadlineTo||"9999").localeCompare(b.deadlineTo||"9999");if(mode==="gemeinde")return(a.gemeinde||"").localeCompare(b.gemeinde||"");return 0})}
+
+function renderMarkers(){markers.forEach(function(m){map.removeLayer(m)});markers=[];var c=0;filtered.forEach(function(bg){if(!bg.lat||!bg.lon)return;c++;var cl=col(bg.typ),sz=isMobile?16:14;var ic=L.divIcon({className:"",iconSize:[sz,sz],iconAnchor:[sz/2,sz/2],html:'<div style="width:'+sz+'px;height:'+sz+'px;background:'+cl+';border:2.5px solid #fff;border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,.35);cursor:pointer"></div>'});var mk=L.marker([bg.lat,bg.lon],{icon:ic}).addTo(map);mk.on("click",function(){selectBg(bg.id);if(isMobile)expandMobile()});markers.push(mk)});var fi=document.getElementById("ftr-info");if(fi)fi.textContent=c+" von "+filtered.length+" auf Karte"}
 
 function renderList(){
   var el=document.getElementById("list-wrap");document.getElementById("total-count").textContent=filtered.length;
   if(!filtered.length){el.innerHTML='<div class="empty">Keine Baugesuche gefunden</div>';return}
-  var h="";filtered.forEach(function(bg){var c=col(bg.typ),d=daysLeft(bg.deadlineTo),ub="";
+  var today=todayStr(),mode=document.getElementById("sel-sort").value,h="",lastDate="";
+  filtered.forEach(function(bg){var c=col(bg.typ),d=daysLeft(bg.deadlineTo),ub="";
     if(d!==null&&d>=0&&d<=10)ub='<span class="bg" style="background:#fef3c7;color:#92400e">Noch '+d+"d</span>";
     var bn=bg.bauherr?'<span class="bh-name">'+esc(bg.bauherr)+"</span>":"";
-    h+='<div class="cd'+(selId===bg.id?" act":"")+'" data-id="'+bg.id+'"><div class="cd-t">'+esc((bg.title||"").replace("Baugesuch - ",""))+'</div><div class="cd-g">'+(bg.gemeinde||"")+'</div><div class="cd-tags"><span class="bg" style="background:'+c+'18;color:'+c+'">'+bg.typ+"</span>"+ub+bn+"</div></div>"});
-  el.innerHTML=h;el.querySelectorAll(".cd").forEach(function(c){c.addEventListener("click",function(){selectBg(this.getAttribute("data-id"))})});
+    var isNew=bg.pubDate===today;
+    if((mode==="date-desc"||mode==="date-asc")&&bg.pubDate&&bg.pubDate!==lastDate){lastDate=bg.pubDate;var isTd=bg.pubDate===today;h+='<div class="date-sep'+(isTd?" today":"")+'">'+( isTd?"Heute \u2013 "+fmtDateLabel(bg.pubDate):fmtDateLabel(bg.pubDate))+"</div>"}
+    h+='<div class="cd'+(selId===bg.id?" act":"")+(isNew?" is-new":"")+'" data-id="'+bg.id+'"><div class="cd-t">'+esc((bg.title||"").replace("Baugesuch - ",""))+'</div><div class="cd-g">'+(bg.gemeinde||"")+'</div><div class="cd-tags"><span class="bg" style="background:'+c+'18;color:'+c+'">'+bg.typ+"</span>"+ub+bn+"</div></div>"});
+  el.innerHTML=h;el.querySelectorAll(".cd").forEach(function(c){c.addEventListener("click",function(){selectBg(this.getAttribute("data-id"))})})
 }
-
-function selectBg(id){selId=id;var bg=DATA.find(function(b){return b.id===id});if(!bg)return;
-  document.getElementById("list-wrap").style.display="none";document.getElementById("detail-wrap").style.display="block";
-  renderDetail(bg);if(bg.lat&&bg.lon)map.flyTo([bg.lat,bg.lon],isMobile?15:16,{duration:.7})}
-
+function selectBg(id){selId=id;var bg=DATA.find(function(b){return b.id===id});if(!bg)return;document.getElementById("list-wrap").style.display="none";document.getElementById("detail-wrap").style.display="block";renderDetail(bg);if(bg.lat&&bg.lon)map.flyTo([bg.lat,bg.lon],isMobile?15:16,{duration:.7})}
 function deselectBg(){selId=null;document.getElementById("detail-wrap").style.display="none";document.getElementById("list-wrap").style.display="block";renderList()}
-
-function renderDetail(bg){
-  var el=document.getElementById("detail-wrap"),c=col(bg.typ),d=daysLeft(bg.deadlineTo),isE=d!==null&&d<0,isU=d!==null&&d<=7&&d>=0;
-  var h='<button class="bk" onclick="window._desel()">\u2190 Zur\u00fcck</button>';
-  h+='<div class="dt">'+esc(bg.title)+'</div><div class="dtags"><span class="bg" style="background:'+c+'18;color:'+c+'">'+bg.typ+'</span><span class="bg" style="background:#eee;color:#555">'+esc(bg.gemeinde)+"</span></div>";
-  if(bg.deadlineTo){var fb=isE?"#fef2f2":isU?"#fffbeb":"#f0fdf4",bb=isE?"#fee2e2":isU?"#fef3c7":"#dcfce7",bc=isE?"#dc2626":isU?"#d97706":"#16a34a",bt=isE?"Abgelaufen":d+" Tage";
-    h+='<div class="fbox" style="background:'+fb+'"><div class="dl">Einsprachefrist</div><div style="display:flex;align-items:center;justify-content:space-between"><span class="dv">'+fmtDate(bg.deadlineFrom)+" \u2013 "+fmtDate(bg.deadlineTo)+'</span><span class="bg" style="background:'+bb+";color:"+bc+'">'+bt+"</span></div></div>"}
+function renderDetail(bg){var el=document.getElementById("detail-wrap"),c=col(bg.typ),d=daysLeft(bg.deadlineTo),isE=d!==null&&d<0,isU=d!==null&&d<=7&&d>=0;
+  var h='<button class="bk" onclick="window._desel()">\u2190 Zur\u00fcck</button><div class="dt">'+esc(bg.title)+'</div><div class="dtags"><span class="bg" style="background:'+c+'18;color:'+c+'">'+bg.typ+'</span><span class="bg" style="background:#eee;color:#555">'+esc(bg.gemeinde)+"</span></div>";
+  if(bg.deadlineTo){var fb=isE?"#fef2f2":isU?"#fffbeb":"#f0fdf4",bb=isE?"#fee2e2":isU?"#fef3c7":"#dcfce7",bc=isE?"#dc2626":isU?"#d97706":"#16a34a",bt=isE?"Abgelaufen":d+" Tage";h+='<div class="fbox" style="background:'+fb+'"><div class="dl">Einsprachefrist</div><div style="display:flex;align-items:center;justify-content:space-between"><span class="dv">'+fmtDate(bg.deadlineFrom)+" \u2013 "+fmtDate(bg.deadlineTo)+'</span><span class="bg" style="background:'+bb+";color:"+bc+'">'+bt+"</span></div></div>"}
   if(bg.bauherr){h+='<div class="df"><div class="dl">Bauherrschaft</div><div class="dv">'+esc(bg.bauherr);if(bg.bauherrAdresse)h+='<br><span style="color:#888">'+esc(bg.bauherrAdresse)+"</span>";h+="</div></div>"}
   if(bg.projektverfasser)h+='<div class="df"><div class="dl">Projektverfasser/in</div><div class="dv">'+esc(bg.projektverfasser)+"</div></div>";
   if(bg.beschreibung)h+='<div class="df"><div class="dl">Beschreibung</div><div class="dv" style="font-size:12px;line-height:1.5">'+esc(bg.beschreibung)+"</div></div>";
   h+='<div class="df"><div class="dl">Meldungsnummer</div><div class="dv">'+esc(bg.pubNumber)+"</div></div>";
   h+='<div class="df"><div class="dl">Publikationsdatum</div><div class="dv">'+fmtDate(bg.pubDate)+"</div></div>";
   if(bg.contact)h+='<div class="df"><div class="dl">Kontakt</div><div class="dv" style="white-space:pre-line;font-size:12px">'+esc(bg.contact)+"</div></div>";
-  h+='<a class="lnk" href="https://amtsblatt.sz.ch/#!/search/publications/detail/'+bg.id+'" target="_blank" rel="noopener">Im Amtsblatt \u00f6ffnen \u2192</a><div style="height:30px"></div>';
-  el.innerHTML=h;
-}
+  h+='<a class="lnk" href="https://amtsblatt.sz.ch/#!/search/publications/detail/'+bg.id+'" target="_blank" rel="noopener">Im Amtsblatt \u00f6ffnen \u2192</a><div style="height:30px"></div>';el.innerHTML=h}
 window._desel=deselectBg;
 
-function applyFilters(){
-  var q=document.getElementById("search-input").value.toLowerCase(),gm=document.getElementById("sel-gem").value,tp=document.getElementById("sel-typ").value;
-  filtered=DATA.filter(function(b){if(gm&&b.gemeinde!==gm)return false;if(tp&&b.typ!==tp)return false;
-    if(q)return(b.title||"").toLowerCase().indexOf(q)>=0||(b.bauherr||"").toLowerCase().indexOf(q)>=0||(b.projektverfasser||"").toLowerCase().indexOf(q)>=0||(b.beschreibung||"").toLowerCase().indexOf(q)>=0||(b.gemeinde||"").toLowerCase().indexOf(q)>=0;return true});
-  if(selId&&!filtered.find(function(b){return b.id===selId}))deselectBg();else renderList();renderMarkers();
-}
+function applyFilters(){var q=document.getElementById("search-input").value.toLowerCase(),gm=document.getElementById("sel-gem").value,tp=document.getElementById("sel-typ").value;
+  filtered=DATA.filter(function(b){if(gm&&b.gemeinde!==gm)return false;if(tp&&b.typ!==tp)return false;if(q)return(b.title||"").toLowerCase().indexOf(q)>=0||(b.bauherr||"").toLowerCase().indexOf(q)>=0||(b.projektverfasser||"").toLowerCase().indexOf(q)>=0||(b.beschreibung||"").toLowerCase().indexOf(q)>=0||(b.gemeinde||"").toLowerCase().indexOf(q)>=0;return true});
+  sortFiltered();if(selId&&!filtered.find(function(b){return b.id===selId}))deselectBg();else renderList();renderMarkers()}
 
 document.getElementById("search-input").addEventListener("input",applyFilters);
 document.getElementById("sel-gem").addEventListener("change",applyFilters);
 document.getElementById("sel-typ").addEventListener("change",applyFilters);
-
+document.getElementById("sel-sort").addEventListener("change",applyFilters);
 window.addEventListener("resize",function(){var w=window.innerWidth<=768;if(w!==isMobile){isMobile=w;var sb=document.getElementById("sidebar");if(isMobile){sb.style.display="flex";sb.classList.add("m-col");mCol=true}else{sb.classList.remove("m-col");sb.style.transform="";sb.style.display="flex"}map.invalidateSize()}});
-
-/* ─── Boot ─── */
 initMap();initLegend();initMobile();loadData();
 })();
 </script>
