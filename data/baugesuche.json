@@ -1,6 +1,6 @@
 {
   "meta": {
-    "fetchedAt": "2026-09-21T12:23:55.834138+00:00",
+    "fetchedAt": "2026-09-21T20:12:09.204278+00:00",
     "source": "amtsblatt.sz.ch",
     "tenant": "kabsz",
     "rubric": "BA-SZ05",
@@ -2382,27 +2382,6 @@
       "contact": "Bauamt\nTel. 041 854 02 30\nbauamt@kuessnacht.ch"
     },
     {
-      "id": "d078a3ab-d95f-4ac6-bdb6-bf3ba697f1a7",
-      "title": "Baugesuch - Büelstrasse 78, Galgenen",
-      "pubNumber": "BA-SZ05-0000001321",
-      "pubDate": "2026-08-27",
-      "expDate": "2026-09-27",
-      "gemeinde": "Galgenen",
-      "municipalityId": "1342",
-      "registrationOffice": "Gemeinde Galgenen",
-      "bauherr": "RED Partners Services Kurt Herpel",
-      "bauherrAdresse": "Chaltenbodenstrasse 16, 8834 Schindellegi",
-      "projektverfasser": "orus+partner architekten gmbh, Cristian Orus, Wiesenstrasse 13",
-      "bauobjekt": "Balkonüberdachung Wohnung C (1. OG), Büelstrasse 78, Galgenen",
-      "beschreibung": "Innerhalb Bauzone; Projektverfasserin: orus+partner architekten gmbh, Cristian Orus, Wiesenstrasse 13, 8834 Schindellegi; Grundeigentümer: Claudio Greco, Spreite 8, 8853 Lachen; Elvira Ruggeri, Spreite 8, 8853 Lachen; Jenny Fenner, Kirchweg 3, 8854 Galgenen; Nicolas Freiholz, Kirchweg 3, 8854 Galgen",
-      "typ": "Baugesuch",
-      "lat": 47.174387,
-      "lon": 8.880128,
-      "deadlineFrom": "2026-08-27",
-      "deadlineTo": "2026-09-16",
-      "contact": "Bauamt\n055 450 24 61\nbauamt@galgenen.ch"
-    },
-    {
       "id": "f5a2577e-48de-4b26-bd16-2cf0a57ae7d9",
       "title": "Baugesuch - Allmig 15, Küssnacht",
       "pubNumber": "BA-SZ05-0000001344",
@@ -2443,6 +2422,27 @@
       "deadlineFrom": "2026-08-27",
       "deadlineTo": "2026-09-16",
       "contact": "Bauamt\nTel. 041 854 02 30\nbauamt@kuessnacht.ch"
+    },
+    {
+      "id": "d078a3ab-d95f-4ac6-bdb6-bf3ba697f1a7",
+      "title": "Baugesuch - Büelstrasse 78, Galgenen",
+      "pubNumber": "BA-SZ05-0000001321",
+      "pubDate": "2026-08-27",
+      "expDate": "2026-09-27",
+      "gemeinde": "Galgenen",
+      "municipalityId": "1342",
+      "registrationOffice": "Gemeinde Galgenen",
+      "bauherr": "RED Partners Services Kurt Herpel",
+      "bauherrAdresse": "Chaltenbodenstrasse 16, 8834 Schindellegi",
+      "projektverfasser": "orus+partner architekten gmbh, Cristian Orus, Wiesenstrasse 13",
+      "bauobjekt": "Balkonüberdachung Wohnung C (1. OG), Büelstrasse 78, Galgenen",
+      "beschreibung": "Innerhalb Bauzone; Projektverfasserin: orus+partner architekten gmbh, Cristian Orus, Wiesenstrasse 13, 8834 Schindellegi; Grundeigentümer: Claudio Greco, Spreite 8, 8853 Lachen; Elvira Ruggeri, Spreite 8, 8853 Lachen; Jenny Fenner, Kirchweg 3, 8854 Galgenen; Nicolas Freiholz, Kirchweg 3, 8854 Galgen",
+      "typ": "Baugesuch",
+      "lat": 47.174387,
+      "lon": 8.880128,
+      "deadlineFrom": "2026-08-27",
+      "deadlineTo": "2026-09-16",
+      "contact": "Bauamt\n055 450 24 61\nbauamt@galgenen.ch"
     },
     {
       "id": "b3de548e-d678-4f7f-8725-e3c82010d335",
